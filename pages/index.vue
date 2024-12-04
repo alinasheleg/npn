@@ -1,15 +1,18 @@
 <script setup lang='ts'>
+import { ref } from "vue";
+import { useFilmStore } from "~/stores/Film";
+import {useCategoryStore} from "~/stores/category";
+
 const filmStore = useFilmStore();
 const countryStore = useCountryStore();
 const categoryStore = useCategoryStore();
-
 const category = ref(null);
 const country = ref(null);
 const sort = ref('name');
 const filter = () => {
+  filmStore.addSortToParams(sort.value);
+  filmStore.addCountryToParams(country.value);
   filmStore.addCategoryToParams(category.value);
-  filmStore.addCountryToParams(category.value);
-  filmStore.addSortToParams(category.value);
   filmStore.fetchFilms();
 }
 
@@ -18,11 +21,21 @@ const resetFilter = () => {
   country.value = null;
   sort.value = 'name';
   filter();
-
-
 }
 
+const goto = (page: number) => {
+  page = (page < 1) ? 1 : page;
+  page = (page > filmStore.totalPages) ? filmStore.totalPages : page;
+  filmStore.currentPage = page;
+  filmStore.fetchFilms();
+}
 
+import { useRouter } from  "vue-router";
+const router = useRouter();
+
+const navigateTo = (filmId: string) => {
+  router.push({ path: '/movieView', query: { id: filmId } });
+};
 </script>
 
 <template>
@@ -71,9 +84,11 @@ const resetFilter = () => {
             <p class="card-text">{{ film.ratingAvg }}</p>
             <p class="card-text">{{ film.duration }} min.</p>
             <p class="card-text">
-              < class="card-title"><template v-for="category in film.categories" :key = "category.id">{{category.name}}>
+              <h6 class="card-title">
+              <template v-for="category in film.categories" :key = "category.id">
                 {{category.name}}
               </template>
+                </h6>
             </p>
             <button  type="button" class="btn btn-info">Info</button>
 
@@ -88,13 +103,34 @@ const resetFilter = () => {
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
-  <nav class="d-flex justify-content-center my-4" aria-label="Page navigation example">
+
+  <nav v-if="!filmStore.isLoading" class="d-flex justify-content-center my-5" aria-label="Page navigation example">
     <ul class="pagination">
-      <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-      <li class="page-item"><a class="page-link" href="#">1</a></li>
-      <li class="page-item"><a class="page-link" href="#">2</a></li>
-      <li class="page-item"><a class="page-link" href="#">3</a></li>
-      <li class="page-item"><a class="page-link" href="#">Next</a></li>
+      <li
+          :class="{'disabled' : filmStore.currentPage === 1} "
+          class="page-item"
+      >
+        <a
+            @click.prevent = "goto(filmStore.currentPage -1)"
+            class="page-link"
+            href="#">Previous</a>
+      </li>
+      <li
+          v-for="page in filmStore.totalPages"
+          :key="page.id"
+          class="page-item"
+          :class="{'active' : page === filmStore.currentPage}"
+      >
+        <a @click.prevent="goto(page)"
+           class="page-link"
+           href="#">{{page}}</a></li>
+      <li
+          :class="{'disabled' : filmStore.currentPage === 10}"
+          class="page-item">
+        <a
+            @click.prevent = "goto(filmStore.currentPage + 1)"
+            class="page-link"
+            href="#">Next</a></li>
     </ul>
   </nav>
 </template>
