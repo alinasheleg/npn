@@ -1,26 +1,23 @@
-<script setup lang='ts'>
-import { ref } from "vue";
-import { useFilmStore } from "~/stores/Film";
-import {useCategoryStore} from "~/stores/category";
+<script setup lang="ts">
 
-const filmStore = useFilmStore();
-const countryStore = useCountryStore();
+
 const categoryStore = useCategoryStore();
+const countryStore = useCountryStore();
+const filmStore = useFilmStore();
 const category = ref(null);
 const country = ref(null);
 const sort = ref('name');
 const filter = () => {
-  filmStore.addSortToParams(sort.value);
-  filmStore.addCountryToParams(country.value);
   filmStore.addCategoryToParams(category.value);
+  filmStore.addCountryToParams(country.value);
+  filmStore.addSortToParams(sort.value);
   filmStore.fetchFilms();
 }
-
 const resetFilter = () => {
   category.value = null;
   country.value = null;
   sort.value = 'name';
-  filter();
+  filter()
 }
 
 const goto = (page: number) => {
@@ -28,104 +25,100 @@ const goto = (page: number) => {
   page = (page > filmStore.totalPages) ? filmStore.totalPages : page;
   filmStore.currentPage = page;
   filmStore.fetchFilms();
-}
-
-import { useRouter } from  "vue-router";
-const router = useRouter();
-
-const navigateTo = (filmId: string) => {
-  router.push({ path: '/movieView', query: { id: filmId } });
 };
+
+
 </script>
 
 <template>
-  <div class="mt-3 row">
-
-    <div class="col-md-4">
-      <select v-model="category" @change="filter" class="form-select" aria-label="Default select example">
-        <option :value="null" selected>Select genge</option>
-        <option
-            v-for="category in categoryStore.categories"
-            :key="category.id"
-            :value="category.id">{{ category.name }} ({{ category.filmCount }})</option>
+  <div class="row">
+    <div class="col-md-4 my-3 ">
+      <select  v-model="category" @change="filter" class="form-select" aria-label="Default select example">
+        <option :value="null" selected>Open this select menu</option>
+        <option v-for="category in categoryStore.categories"
+                :key="category.id"
+                :value="category.id">{{category.name}} ({{category.filmCount}})</option>
       </select>
     </div>
-
-    <div class="col-md-4">
+    <div class="col-md-4 my-3">
       <select v-model="country" @change="filter" class="form-select" aria-label="Default select example">
-        <option :value="null" selected>Select country</option>
-        <option
-            v-for="country in countryStore.countries"
-            :key="country.id"
-            :value="country.id"
-        >{{ country.name }}</option>
+        <option value="null" selected>select country</option>
+        <option v-for="country in countryStore.countries"
+                :key="country.id"
+                :value="country.id">{{country.name}}</option>
+
       </select>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-2 my-3">
       <select v-model="sort" @change="filter" class="form-select" aria-label="Default select example">
-        <option selected>Select genge</option>
-        <option value="Name">Name</option>
-        <option value="Year">Year</option>
-        <option value="Rating">Rating</option>
+        <option value="name" selected>Open this select menu</option>
+        <option value="1">One</option>
+        <option value="2">Two</option>
+        <option value="3">Three</option>
       </select>
     </div>
-
-    <div class="col-md-2">
-      <button @click="resetFilter" class="btn outline-warning">Reset</button>
+    <div class="col-md-2 my-3">
+      <button @click="resetFilter"  class="btn btn-danger" type="submit">reset</button>
     </div>
-    <div  class="row row-cols-1 row-cols-md-3 g-4">
+  </div>
 
-      <div class="col" v-for="film in filmStore.films" :key="film.id" >
-        <div class="card">
-          <img v-if="film.link_img" :src="film.link_img" class="card-img-top" alt="film.link_img">
-          <img v-else src="https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/50c92dd6-51a3-4ec5-a334-fc21f486e0bc/1920x" class="card-img-top" alt="film.link_img">
-          <div class="card-body">
-            <h5 class="card-title">{{film.name}}</h5>
-            <p class="card-text">{{ film.ratingAvg }}</p>
-            <p class="card-text">{{ film.duration }} min.</p>
-            <p class="card-text">
-              <h6 class="card-title">
-              <template v-for="category in film.categories" :key = "category.id">
-                {{category.name}}
-              </template>
-                </h6>
-            </p>
-            <button  type="button" class="btn btn-info">Info</button>
 
-          </div>
+
+  <div v-if="!filmStore.isLoading" class="row row-cols-1 row-cols-md-3 my-1 g-4">
+    <div class="col" v-for="film in filmStore.films" :key="film.id">
+      <div class="card h-100">
+        <img v-if="film.link_img" :src="film.link_img" class="img-thumbnail" alt="tor" style="height: 500px;">
+        <img v-else src="https://avatars.mds.yandex.net/i?id=227a832d095e0f249bf94a57c399bc98_l-12585911-images-thumbs&n=13" class="img-thumbnail"  alt="tor" style="height: 500px;">
+        <div class="card-body">
+          <h5 class="card-title">{{film.name}}</h5>
+          <p class="card-text"> {{film.ratingAvg}}</p>
+          <p class="card-text">{{film.duration}} min </p>
+          <p class="card-text"><template v-for="category in film.categories" :key="category.id">
+            {{category.name}},
+          </template></p>
+
+
+
+
+
+        </div>
+        <div class="d-grid gap-2 col-6 mx-auto">
+          <button @click="$router.push('/film/' + film.id)" class="btn btn-outline-success my-4" type="submit">Смотреть</button>
         </div>
       </div>
     </div>
   </div>
-  <div class="justify-content-center">
 
-    <div v-if="filmStore.isLoading" class="spinner-border" role="status">
+
+  <div v-else class="text-center">
+    <div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
+
   </div>
 
-  <nav v-if="!filmStore.isLoading" class="d-flex justify-content-center my-5" aria-label="Page navigation example">
+  <nav class="d-flex justify-content-center my-5" aria-label="Page navigation example">
     <ul class="pagination">
       <li
-          :class="{'disabled' : filmStore.currentPage === 1} "
-          class="page-item"
-      >
+          :class="{'disabled': filmStore.currentPage === 1}"
+          class="page-item">
         <a
             @click.prevent = "goto(filmStore.currentPage -1)"
             class="page-link"
-            href="#">Previous</a>
-      </li>
+            href="#">Previous</a></li>
       <li
           v-for="page in filmStore.totalPages"
-          :key="page.id"
+          :key="page"
           class="page-item"
-          :class="{'active' : page === filmStore.currentPage}"
+          :class="{'active': page === filmStore.currentPage}"
       >
         <a @click.prevent="goto(page)"
            class="page-link"
-           href="#">{{page}}</a></li>
+           href="#">{{page}}</a>
+
+      </li>
       <li
-          :class="{'disabled' : filmStore.currentPage === 10}"
+          :class="{'disabled': filmStore.currentPage === 3}"
           class="page-item">
         <a
             @click.prevent = "goto(filmStore.currentPage + 1)"
@@ -133,4 +126,6 @@ const navigateTo = (filmId: string) => {
             href="#">Next</a></li>
     </ul>
   </nav>
+
+
 </template>
