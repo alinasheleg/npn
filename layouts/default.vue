@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import {useRouter} from "#imports";
+import { useRouter } from "#imports";
+import { useAuthStore } from "~/stores/auth";
+
 
 const authStore = useAuthStore();
-const logout = async () => {
-  await  authStore.signout();
-  await router.push('/');
-}
 const router = useRouter();
-</script>
 
+
+const logout = async () => {
+  await authStore.signout();
+  await router.push("/");
+};
+</script>
 
 <template>
   <header>
@@ -19,11 +22,13 @@ const router = useRouter();
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarCollapse">
+          <!-- Проверка, авторизован ли пользователь -->
           <template v-if="!authStore.authData">
             <button @click="$router.push('/signin')" class="btn btn-outline-success me-3" type="submit">Sign in</button>
             <button @click="$router.push('/signup')" class="btn btn-outline-danger" type="submit">Sign up</button>
           </template>
           <template v-else>
+            <button @click="$router.push(`/profile`)" class="btn btn-outline-success me-2" type="submit">user</button>
             <button @click="logout" class="btn btn-outline-danger" type="submit">sign out</button>
           </template>
         </div>
@@ -31,18 +36,15 @@ const router = useRouter();
     </nav>
   </header>
 
-
   <main class="flex-shrink-0">
     <div class="container">
       <slot />
     </div>
   </main>
 
-
-
   <footer class="footer mt-auto py-0.5 bg-body-tertiary fixed-bottom">
     <div class="container">
-      <span class="text-body-secondary">&copy;Kino-Tower-2024</span>
+      <span class="text-body-secondary">&copy; Kino-Tower-2024</span>
     </div>
   </footer>
 </template>

@@ -51,10 +51,10 @@ const goto = (page: number) => {
     </div>
     <div class="col-md-2 my-3">
       <select v-model="sort" @change="filter" class="form-select" aria-label="Default select example">
-        <option value="name" selected>Open this select menu</option>
-        <option value="1">One</option>
-        <option value="2">Two</option>
-        <option value="3">Three</option>
+        <option selected>Open this select menu</option>
+        <option value="name">Name</option>
+        <option value="year">Year</option>
+        <option value="rating">Rating</option>
       </select>
     </div>
     <div class="col-md-2 my-3">

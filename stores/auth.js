@@ -3,7 +3,7 @@ import {api} from "~/api/index.js";
 
 export const useAuthStore = defineStore("auth", () => {
     const authData = ref(null);
-    const authCookie =  useCookie("auth");
+    const authCookie = useCookie("auth");
     const signin = async (data) => {
         try {
             const res = await api.post("/auth/signin", data);
@@ -21,20 +21,31 @@ export const useAuthStore = defineStore("auth", () => {
             console.error(e);
         }
     }
-    const saveAuthData = () =>{
+
+
+    const saveAuthData = () => {
         if (authCookie.value) {
             authCookie.value = btoa(JSON.stringify(authData.value));
         }
     }
-    const readAuthData = () =>{
-        if (authCookie.value){
+    const readAuthData = () => {
+        if (authCookie.value) {
             authData.value = JSON.parse(atob(authCookie.value));
         }
     }
-    readAuthData()
-    return {
-        authData,
-        signup,
-        signin,
-    }
+        const signout = () => {
+            authData.value = null; // Очищаем данные пользователя
+            authCookie.value = null;
+        }
+        readAuthData()
+        return {
+            authData,
+            signup,
+            signin,
+            signout
+        }
 })
+
+
+
+
